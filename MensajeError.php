@@ -335,6 +335,56 @@
       $Block .= "No tiene \"{$_GET{'Var'}}\" registrado
                         <br />";
       break;
+    case 2206:
+      $Block .= "No puedo conexionar a la base de datos: TianguisCabal
+                        <br />";
+      break;
+    case 2207:
+      $Block .= "&iexcl;Faltan Campos Obligatorios!
+                        <br />";
+      break;
+    case 2208:
+      $Block .= "El \"Password Nuevo\" y el \"Verificar Password\" no son
+                       igual
+                        <br />";
+      break;
+    case 2209:
+      $Block .= "&iexcl;El Password no es aceptable!
+                        </p>
+                        <p style=\"font-weight:bold; color:#000090;
+                           text-align:center;\" class=\"LargeTextFont\">
+                        Tu Password debe tener:
+                        </p>
+                        <p style=\"font-weight:bold; color:#000090;
+                           text-align:center;\" class=\"LargeTextFont\">
+                          6 caracteres, como minimo
+                        </p>
+                        <p style=\"font-weight:bold; color:#000090;
+                           text-align:center;\" class=\"LargeTextFont\">
+                          que son una combinaci&oacute;n de
+                        </p>
+                        <p style=\"font-weight:bold; color:#000090;
+                           text-align:center;\" class=\"LargeTextFont\">
+                          min&uacute;sculas,
+                          <br />
+                          MAY&Uacute;SCULAS,
+                          <br />
+                          N&uacute;meros
+                          <br />
+                          y
+                          <br />
+                          Signos de puctuaci&oacute;n.
+                          <br />";
+      break;
+    case 2210:
+      $Block .= "No puedo insert/update Vendedores
+                        <br />";
+      break;
+    case 2211:
+      $Block .= "Faltan Datos Obligatorios del sistema - Disculpa pero no
+                 podemos continuar
+                        <br />";
+      break;
       case 3001:         // CatProdArtDesc.php
         $Block .= "No tiene registros para desplegar
                           <br />";

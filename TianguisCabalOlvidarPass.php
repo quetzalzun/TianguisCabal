@@ -5,22 +5,78 @@
   include( "includes/TianguisCabalROEnviron.inc" );
   require_once( "/etc/TianguisCabal.inc" );
 
-  /*
-  if( @$_POST{'Sibmit'} ||
-    ( @$_GET{'Accion'} && @$_GET{'Accion'} != "LogOut" ) )
+  if( @$_POST{'Accion'} == "CambiaPWD" )
   {
-    if( $_SERVER{'SERVER_PORT'} != 443 )
+    if( !@$_POST{'UserID'} )
     {
-      if( $_SERVER{'HTTP_HOST'} == "www.linuxcabal.org" )
-        header( "Location: https://www.imat.com/linuxcabal.org/TianguisCabalOnLine.php?Lang=$Lang&From=Tianguis" );
-      else if( $_SERVER{'HTTP_HOST'} == "localhost" )
-        header( "Location: https://localhost/linuxcabal.org/TianguisCabalOnLine.php?Lang=$Lang&From=Tianguis" );
+      header( "Location: MensajeError.php?Errno=2211&Lang=$Lang&From=$From" );
+               //Falta Non User suplied Campos Obligatorios
       exit();
     }
-  }
-  */
 
-  if( $_POST{'Accion'} == "EnviarLiga" )
+    if( !@$_POST{'PNuevo'} || !@$_POST{'PVer'} )
+    {
+      header( "Location: MensajeError.php?Errno=2207&Lang=$Lang&From=$From" );
+               //Falta Campos Obligatorios
+      exit();
+    }
+
+    if( @$_POST{'PNuevo'} !== $_POST{'PVer'} )
+    {
+      header( "Location: MensajeError.php?Errno=2208&Lang=$Lang&From=$From" );
+               //Contraseñas No son Egual
+      exit();
+    }
+
+    if( !IsPWDSeguro( $_POST{'PNuevo'} ) )
+    {
+      header( "Location: MensajeError.php?Errno=2209&Lang=$Lang&From=$From" );
+               //PWD no está Seguro
+      exit();
+    }
+
+    $PWD = md5( $_POST{'PNuevo'} );
+
+    $Conn = mysqli_init();
+    mysqli_options($Conn, MYSQLI_INIT_COMMAND, "SET AUTOCOMMIT=1");
+    mysqli_options($Conn, MYSQLI_OPT_CONNECT_TIMEOUT, 5);
+    mysqli_real_connect( $Conn, 'localhost', $Clase, $AccessType,
+                         'TianguisCabal', MYSQLI_CLIENT_SSL );
+
+    if( mysqli_connect_errno() )
+    {
+      mysqli_close( $Conn );
+      header( "Location: MensajeError.php?Errno=2206&Lang=$Lang&From=$From" );
+      exit();
+    }
+    $Query = "update Vendedores set PWD = '{$PWD}', Fecha = CURDATE()
+                  where UserID = {$_POST{'UserID'}}";
+
+
+    if( !$QueryRes = mysqli_query( $Conn, $Query ) )
+    {
+      mysqli_close( $Conn );
+      header( "Location: MensajeError.php?Errno=2210&Lang=$Lang&From=$From" );
+               //No puede insert PWD
+      exit();
+    }
+
+    unlink( $_POST{'FileName'} );
+
+    $Block = "   <p class=\"SubTitleFont\" style=\"font-weight:bold;
+                    color:#0000aa; text-align:center;\">";
+    if( $Lang == ' en' )
+      $Block .=   "-=&nbsp;Cambio de Tu Contrase&ntilde;a&nbsp;=-
+                   <br />
+                   &iexcl;&nbsp;CONFIRMADA&nbsp;!";
+    else
+      $Block .=   "-=&nbsp;Password Change&nbsp;=-
+                   <br />
+                   CONFIRMED!";
+    $Block .=     "<br />
+                 </p>";
+  }  
+  elseif( @$_POST{'Accion'} == "EnviarLiga" )
   {
     if( !@$_POST{'Correo'} )
     {
@@ -76,7 +132,7 @@
 
     $Pedidor = mysqli_fetch_array( $QueryRes );
 
-    $LigaBase = md5( time() );
+    $LigaBase = md5( ( time() . $Pedidor{'UserID'} ) );
     $LigaArchivo = "TianguisCabalMaint/{$LigaBase}.php";
     $LigaURL = "https://www.imat.com/linuxcabal.org/{$LigaArchivo}?Lang=$Lang&From=$From&DD=../";
 
@@ -107,6 +163,8 @@
                     <br />
                     <input type=\\\"hidden\\\" name=\\\"Accion\\\"
                            value=\\\"CambiaPWD\\\" />
+                    <input type=\\\"hidden\\\" name=\\\"FileName\\\"
+                           value=\\\"/var/www/html/linuxcabal.org/{$LigaArchivo}\\\" />
                     <input type=\\\"hidden\\\" name=\\\"UserID\\\"
                            value={$Pedidor{'UserID'}} />
                     <input type=\\\"submit\\\" name=\\\"Submit\\\"
@@ -136,14 +194,13 @@
     $Mensaje ="Saludos {$Pedidor{'Nombres'}}\r\n
                Recibimos una petición a cambiar la contraseña del usuario
                qeu tiene tu E-Mail\r\n
-               \r\n
                Si quieres cambiar la contraseña del usuario
                \"{$Pedidor{'Login'}}\", haga click en la URL:\r\n
                {$LigaURL}\r\n
                \r\n
                Este URL expire en 1 (una) hora\r\n
                \r\n
-               Gracias para usar el TianguisCabal\r\n\r\n\r\n
+               Gracias para usar el TianguisCabal\r\n\r\n
                webmaster@LinuxCabal.org";
 
 
@@ -162,25 +219,6 @@
   }
   else
   {
-    $Block =    "<p class=\"SubTitleFont\" style=\"text-align:center;\">
-                   <img src=\"images/construction.gif\"
-                        alt=\"construction.gif\" />";
-    if( $Lang == 'en' )
-      $Block .= "  This page is presently under construction
-                   <br />
-                   and is therefore disfunctional. 
-                   <br />
-                   Please excuse our dust
-                   <br />
-                   while we improve the system
-                 </p>";
-    else
-      $Block .= "  Esta p&aacute;gina est&aacute; en construcci&oacute;n
-                   <br />
-                   entonces est&aacute; disfuncional
-                   <br />
-                   Por favor disculpa las molestias
-                 </p>";
     if( $Lang == 'en' )
       $Block .= "<p class=\"LargeTextFont\" style=\"text-align:center;\">
                    It is not possible to recover your existing password

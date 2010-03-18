@@ -7,7 +7,8 @@
     CREATE TABLE `Categoria` (
       `CatID` tinyint(4) NOT NULL auto_increment,
       `Categoria` varchar(50) NOT NULL default '',
-      PRIMARY KEY  (`CatID`)
+      PRIMARY KEY  (`CatID`),
+      UNIQUE KEY `Categoria` (`Categoria`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     INSERT INTO `Categoria` VALUES (1,'Almacenamiento'),(2,'Audio/Sonido'),
@@ -50,14 +51,16 @@
       `Calidad` enum('Excelente','Muy Buena','Buena','Regular','Partes') default 'Muy Buena',
       `Precio` varchar(10) NOT NULL default '00.00',
       `LinkFoto` varchar(175) default '',
-      `CompraVenta` enum('Se Vende','Quiero Comprar') default 'Se Vende',
-      `InterCambiar` varchar(12) default '',
+      `CompraVenta` enum('Se Vende','Quiero Comprar') default 'Se Vende', `InterCambiar` varchar(12) default '',
       `CambiarParaQue` varchar(250) default '',
       `Categoria` varchar(50) NOT NULL default '',
       PRIMARY KEY  (`VentaID`),
       KEY `UserID` (`UserID`),
+      KEY `Categoria` (`Categoria`),
+      CONSTRAINT `Ventas_ibfk_2` FOREIGN KEY (`Categoria`) REFERENCES `Categoria` (`Categoria`),
       CONSTRAINT `Ventas_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `Vendedores` (`UserID`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
   */
   include( "includes/TianguisCabalFunctions.inc" );
